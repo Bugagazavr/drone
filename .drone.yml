@@ -1,25 +1,45 @@
 image: go1.3
-git:
-  path: github.com/drone/drone
-env:
-  - GOROOT=/usr/local/go
-  - PATH=$PATH:$GOROOT/bin:$GOPATH/bin
-script:
-  - sudo apt-get -y install zip libsqlite3-dev sqlite3 1> /dev/null 2> /dev/null
-  - make deps
-  - make test
-  - make dpkg
-notify:
-  email:
-    recipients:
-      - brad@drone.io
 
-publish:
-  s3:
-    acl: public-read
-    region: us-east-1
-    bucket: downloads.drone.io
-    access_key: $AWS_KEY
-    secret_key: $AWS_SECRET
-    source: debian/drone.deb
-    target: $DRONE_BRANCH/
+matrix:
+  - name: 'sqlite3'
+    git:
+      path: github.com/drone/drone
+    env:
+      - GOROOT=/usr/local/go
+      - PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+      - DRONE_DATABASE_DRIVER="sqlite3" 
+      - DRONE_DATABASE_DATASOURCE=":memory:"
+    script:
+      - sudo apt-get -y install zip libsqlite3-dev sqlite3 1> /dev/null 2> /dev/null
+      - make deps
+      - make test
+  - name: 'postgresql'
+    git:
+      path: github.com/drone/drone
+    services:
+      - postgres
+    env:
+      - GOROOT=/usr/local/go
+      - PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+      - DRONE_DATABASE_DRIVER="postgres" 
+    script:
+      - echo $DRONE_DATABASE_DATASOURCE
+      - sudo apt-get -y install zip libsqlite3-dev sqlite3 1> /dev/null 2> /dev/null
+      - make deps
+      - psql -p 5432 -h localhost -U postgres -c 'create database drone;'
+      - DRONE_DATABASE_DATASOURCE="user=postgres host=127.0.0.1 port=5432 dbname=drone sslmode=disable" make test
+  - name: 'mysql'
+    git:
+      path: github.com/drone/drone
+    services:
+      - mysql
+    env:
+      - GOROOT=/usr/local/go
+      - PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+      - DRONE_DATABASE_DRIVER="mysql" 
+      - DRONE_DATABASE_DATASOURCE="root@tcp(127.0.0.1:3306)/drone"
+    script:
+      - sudo apt-get -y install zip libsqlite3-dev sqlite3 1> /dev/null 2> /dev/null
+      - make deps
+      - mysql -P 3306 --protocol=tcp -u root -e 'create database drone;'
+      - make test

@@ -14,8 +14,6 @@ import (
 	"github.com/drone/drone/shared/build/buildfile"
 	"github.com/drone/drone/shared/build/git"
 	"github.com/drone/drone/shared/build/repo"
-
-	"github.com/kr/pretty"
 )
 
 func ParseBuild(data string, params map[string]string) (*Build, error) {
@@ -52,8 +50,6 @@ func ParseBuild(data string, params map[string]string) (*Build, error) {
 
 		yml.Matrix = append(yml.Matrix, &matrix)
 	}
-
-	pretty.Log(yml)
 
 	return yml, nil
 }

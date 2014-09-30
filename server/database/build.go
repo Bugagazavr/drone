@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/drone/drone/server/helper"
 	"github.com/drone/drone/shared/model"
 	"github.com/russross/meddler"
 )
@@ -54,19 +55,19 @@ func NewBuildManager(db *sql.DB) BuildManager {
 
 func (db *buildManager) Find(index, commit int64) (*model.Build, error) {
 	dst := model.Build{}
-	err := meddler.QueryRow(db, &dst, findBuildQuery, index, commit)
+	err := meddler.QueryRow(db, &dst, helper.Rebind(findBuildQuery), index, commit)
 	return &dst, err
 }
 
 func (db *buildManager) FindCommit(id int64) ([]*model.Build, error) {
 	var dst []*model.Build
-	err := meddler.QueryAll(db, &dst, listBuildsCommitQuery, id)
+	err := meddler.QueryAll(db, &dst, helper.Rebind(listBuildsCommitQuery), id)
 	return dst, err
 }
 
 func (db *buildManager) FindOutput(build int64) ([]byte, error) {
 	var dst string
-	err := db.QueryRow(findOutputQuery, build).Scan(&dst)
+	err := db.QueryRow(helper.Rebind(findOutputQuery), build).Scan(&dst)
 	return []byte(dst), err
 }
 
@@ -76,7 +77,7 @@ func (db *buildManager) Update(build *model.Build) error {
 }
 
 func (db *buildManager) UpdateOutput(build *model.Build, out []byte) error {
-	_, err := db.Exec(updateOutputStmt, out, build.ID)
+	_, err := db.Exec(helper.Rebind(updateOutputStmt), out, build.ID)
 	return err
 }
 
