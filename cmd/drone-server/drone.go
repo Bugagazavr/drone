@@ -8,7 +8,7 @@ import (
 	"github.com/drone/drone/Godeps/_workspace/src/github.com/gin-gonic/gin"
 
 	"github.com/drone/drone/Godeps/_workspace/src/github.com/elazarl/go-bindata-assetfs"
-	"github.com/drone/drone/pkg/remote/github"
+	client "github.com/drone/drone/pkg/remote/client"
 	"github.com/drone/drone/pkg/server"
 	"github.com/drone/drone/pkg/server/session"
 	"github.com/drone/drone/pkg/settings"
@@ -46,7 +46,10 @@ func main() {
 	store := store.New(db)
 	defer db.Close()
 
-	remote := github.New(settings.Service)
+	remote, err := client.New(settings.Service)
+	if err != nil {
+		panic(err)
+	}
 	session := session.New(settings.Session)
 	eventbus_ := eventbus.New()
 	queue_ := queue.New()

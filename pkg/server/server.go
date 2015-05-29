@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"reflect"
 	"time"
 
 	"github.com/drone/drone/Godeps/_workspace/src/github.com/gin-gonic/gin"
@@ -119,7 +120,14 @@ func ToUser(c *gin.Context) *common.User {
 	if !ok {
 		return nil
 	}
-	return v.(*common.User)
+
+	u := reflect.TypeOf(v).Elem()
+	switch u.Name() {
+	case "CaseUser":
+		return v.(*common.CaseUser).ToUser()
+	default:
+		return v.(*common.User)
+	}
 }
 
 func ToRepo(c *gin.Context) *common.Repo {

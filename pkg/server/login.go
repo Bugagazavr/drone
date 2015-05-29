@@ -49,6 +49,8 @@ func GetLogin(c *gin.Context) {
 		return
 	}
 
+	println(c)
+
 	login := ToUser(c)
 
 	// check organization membership, if applicable

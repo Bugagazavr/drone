@@ -13,3 +13,29 @@ type User struct {
 	Created  int64  `meddler:"user_created"  json:"created_at,omitempty"`
 	Updated  int64  `meddler:"user_updated"  json:"updated_at,omitempty"`
 }
+
+type CaseUser struct {
+	*User
+	Token  string `meddler:"user_token"    json:"token"`
+	Secret string `meddler:"user_secret"   json:"secret"`
+}
+
+func (u *User) ToCaseUser() *CaseUser {
+	return &CaseUser{u, u.Token, u.Secret}
+}
+
+func (cu *CaseUser) ToUser() *User {
+	return &User{
+		ID:       cu.ID,
+		Login:    cu.Login,
+		Token:    cu.Token,
+		Secret:   cu.Secret,
+		Name:     cu.Name,
+		Email:    cu.Email,
+		Gravatar: cu.Gravatar,
+		Admin:    cu.Admin,
+		Active:   cu.Active,
+		Created:  cu.Created,
+		Updated:  cu.Updated,
+	}
+}

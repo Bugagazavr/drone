@@ -169,11 +169,11 @@ func PostRepo(c *gin.Context) {
 	// get the repository and user permissions
 	// from the remote system.
 	remote := ToRemote(c)
-	r, err := remote.Repo(user, owner, name)
+	r, err := remote.Repo(user.ToCaseUser(), owner, name)
 	if err != nil {
 		c.Fail(400, err)
 	}
-	m, err := remote.Perm(user, owner, name)
+	m, err := remote.Perm(user.ToCaseUser(), owner, name)
 	if err != nil {
 		c.Fail(400, err)
 		return
@@ -298,7 +298,7 @@ func perms(remote remote.Remote, u *common.User, r *common.Repo) *common.Perm {
 		return &common.Perm{Pull: true, Push: true, Admin: true}
 	}
 
-	p, err := remote.Perm(u, r.Owner, r.Name)
+	p, err := remote.Perm(u.ToCaseUser(), r.Owner, r.Name)
 	if err != nil {
 		return &common.Perm{}
 	}
